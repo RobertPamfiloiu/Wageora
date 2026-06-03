@@ -1,0 +1,169 @@
+.pay-page {
+  min-height: 100vh;
+  background: var(--blue-pale);
+}
+
+.pay-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Header ── */
+.pay-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pay-header-titles {
+  flex: 1;
+}
+
+.pay-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0;
+}
+
+.pay-sub {
+  color: var(--gray-500);
+  font-size: .9rem;
+  margin: .1rem 0 0;
+}
+
+.pay-error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: .875rem;
+}
+
+/* ── Stats row ── */
+.pay-stats-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 140px;
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--gray-500);
+  margin: 0 0 6px;
+}
+
+.stat-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0;
+}
+
+.stat-green { color: #16a34a; }
+.stat-amber { color: #d97706; }
+
+/* ── Chart ── */
+.pay-chart-card {
+  padding: 20px;
+}
+
+.pay-chart-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 16px;
+}
+
+/* ── Table card ── */
+.pay-table-card {
+  overflow: hidden;
+}
+
+/* ── Form ── */
+.payslip-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+/* ── Badges for Paid / Pending ── */
+.badge-paid {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* ── Modal (self-contained so no dependency on EmployeeModal.css) ── */
+.modal-box {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  padding: 28px;
+  animation: scaleIn .2s ease both;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .pay-content { padding: 16px 12px; }
+  .pay-title   { font-size: 1.4rem; }
+  .form-row-2  { grid-template-columns: 1fr; }
+  .pay-header  { flex-direction: column; align-items: flex-start; }
+}

@@ -1,0 +1,168 @@
+.charts-page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.charts-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.charts-header {
+  margin-bottom: 1.5rem;
+}
+
+.charts-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: .25rem;
+}
+
+.charts-sub {
+  color: var(--gray-500);
+  font-size: .9rem;
+}
+
+/* ── Analytics panel ── */
+.analytics-panel {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+}
+
+.analytics-chart-area {
+  flex: 1;
+  padding: 1.5rem 1.5rem 1.5rem 1.25rem;
+  min-height: 320px;
+}
+
+.chart-viz {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Pie legend */
+.pie-legend {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+
+.pie-legend-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .85rem;
+}
+
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-name {
+  flex: 1;
+  color: var(--gray-700);
+}
+
+.legend-val {
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.legend-pct {
+  font-weight: 400;
+  color: var(--gray-500);
+  font-size: .8rem;
+}
+
+/* Tabular view inside panel */
+.tabular-viz {
+  width: 100%;
+  align-items: stretch;
+}
+
+.analytics-table {
+  width: 100%;
+}
+
+.analytics-table td,
+.analytics-table th {
+  padding: .5rem .75rem;
+  font-size: .88rem;
+}
+
+/* ── Right-side toggle buttons ── */
+.analytics-controls {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  padding: 1.5rem 1.25rem;
+  border-left: 1px solid var(--gray-200);
+  background: #f8fafc;
+  justify-content: center;
+  min-width: 110px;
+}
+
+.view-btn {
+  padding: .55rem 1rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--gray-300);
+  background: white;
+  color: var(--gray-600);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s;
+  text-align: center;
+}
+
+.view-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.view-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* ── Edit table ── */
+.charts-table-card {
+  overflow: hidden;
+}
+
+.charts-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem .75rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+@media (max-width: 640px) {
+  .analytics-panel {
+    flex-direction: column;
+  }
+
+  .analytics-controls {
+    flex-direction: row;
+    border-left: none;
+    border-top: 1px solid var(--gray-200);
+    justify-content: center;
+    padding: .75rem;
+  }
+}

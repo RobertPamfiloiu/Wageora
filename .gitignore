@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Database
+backend/wageora.db
+
+# SSL certs
+backend/cert.pem
+backend/key.pem
+
+# Environment files
+.env
+.env.local
+
+# Build output
+dist/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Coverage
+coverage/
+
+# IDE
+.idea/

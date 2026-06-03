@@ -1,0 +1,342 @@
+================================================================================
+  WAGEORA — SETUP & TESTING GUIDE
+================================================================================
+
+REQUIREMENTS
+------------
+  - Python 3.11 or 3.12
+  - Node.js 18+ and npm
+  - Two devices on the same network (for the Bronze different-machine demo)
+    Can be: two PCs, a PC + phone, a PC + virtual machine
+
+
+================================================================================
+  PART 1 — INSTALL DEPENDENCIES
+================================================================================
+
+Step 1 — Backend dependencies
+------------------------------
+  Open a terminal, navigate to the backend folder, and install:
+
+    cd path\to\Wageora\Wageora\backend
+    py -m pip install -r requirements.txt
+
+  This installs:
+    fastapi, uvicorn, sqlalchemy, tinydb, strawberry-graphql,
+    pytest, pytest-cov, httpx, faker, websockets
+
+
+Step 2 — Frontend dependencies
+--------------------------------
+  Open a second terminal, navigate to the root folder:
+
+    cd path\to\Wageora\Wageora
+    npm install
+
+
+================================================================================
+  PART 2 — RUN THE AUTOMATED TESTS
+================================================================================
+
+Navigate to the backend folder and run:
+
+    cd path\to\Wageora\Wageora\backend
+    py -m pytest tests/ -v
+
+Expected result: 134 tests pass.
+
+To see a coverage report in the terminal:
+
+    py -m pytest tests/ -v --cov=. --cov-report=term-missing
+
+To generate an HTML coverage report (open htmlcov/index.html after):
+
+    py -m pytest tests/ --cov=. --cov-report=html
+
+Tests are split into 6 files:
+  tests/test_employees.py   — Employee CRUD, pagination, search, pay calc
+  tests/test_auth.py        — Register, login, permissions (admin vs employee)
+  tests/test_statistics.py  — Payroll stats, department breakdown
+  tests/test_structure.py   — Role CRUD
+  tests/test_payslips.py    — Payslip CRUD, stats, cascade delete
+  tests/test_logs.py        — Action logs, suspicious user detection
+
+
+================================================================================
+  PART 3 — START BOTH SERVERS (SAME MACHINE)
+================================================================================
+
+Terminal 1 — Start the backend:
+
+    cd path\to\Wageora\Wageora\backend
+    py -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  The --host 0.0.0.0 flag makes the backend reachable from other devices
+  on your network (required for the different-machine demo).
+
+  On first startup the server will:
+    - Create wageora.db (SQLite relational database)
+    - Create all 9 tables from the ORM models
+    - Seed 10 employees, default roles, and user groups/permissions
+    - The database file persists between restarts
+
+  You can verify the API is running at: http://localhost:8000/docs
+
+
+Terminal 2 — Start the frontend:
+
+    cd path\to\Wageora\Wageora
+    npm run dev
+
+  Open: http://localhost:5173
+
+
+================================================================================
+  PART 4 — BRONZE DEMO (CLIENT ON A DIFFERENT DEVICE)
+================================================================================
+
+The assignment requires the client to run from a different machine.
+
+Step 1 — Find your server IP address
+--------------------------------------
+  On the machine running the backend, open a terminal and run:
+
+    ipconfig
+
+  Look for "IPv4 Address" under your active network adapter.
+  Example: 192.168.1.42
+
+  NOTE: Both devices must be on the same Wi-Fi or network.
+
+
+Step 2 — Access from another device (simplest method)
+-------------------------------------------------------
+  The Vite frontend already listens on 0.0.0.0 (all interfaces).
+  On the second device (phone, laptop, VM), open a browser and go to:
+
+    http://192.168.1.42:5173
+
+  Replace 192.168.1.42 with your actual server IP.
+  The full application will load. All API calls are proxied through
+  Vite back to the backend on the server machine.
+
+  This satisfies the requirement: client (browser on Device 2) is
+  running on a different machine from the server (Device 1).
+
+
+Step 3 — Run the frontend ON the second machine (alternative)
+---------------------------------------------------------------
+  If you want the Vite dev server itself on the second machine:
+
+  1. Copy the project to the second machine (or clone it)
+  2. In the root folder, create a file called ".env.local" with:
+
+       VITE_BACKEND_URL=http://192.168.1.42:8000
+
+     (replace with your server's actual IP)
+
+  3. Install and run:
+
+       npm install
+       npm run dev
+
+  4. Open http://localhost:5173 on the second machine.
+     All /api requests will be forwarded to the server at 192.168.1.42.
+
+
+If devices cannot connect — Windows Firewall
+---------------------------------------------
+  Run these in PowerShell as Administrator on the SERVER machine:
+
+    netsh advfirewall firewall add rule name="Wageora Backend" dir=in action=allow protocol=TCP localport=8000
+    netsh advfirewall firewall add rule name="Wageora Frontend" dir=in action=allow protocol=TCP localport=5173
+
+
+================================================================================
+  PART 5 — MANUAL FEATURE TESTING
+================================================================================
+
+--- EMPLOYEES AND DATA PERSISTENCE ---
+
+1. Go to http://localhost:5173
+2. Click "Sign in" → "Admin Login" → "Create an account" → register admin
+3. Log in as admin
+4. Go to Employees
+5. Add a new employee (click + button)
+6. Restart the backend server (Ctrl+C, then re-run uvicorn)
+7. Refresh the browser — the employee is still there (database persists)
+
+
+--- PAYSLIPS ---
+
+1. In the Employees list, click an employee
+2. Click "View Payslips"
+3. Add a payslip with a gross pay and deductions
+4. The stats (total paid, pending, by month) update automatically
+5. Deleting the employee from the Employees page also deletes their payslips
+
+
+--- CHARTS ---
+
+1. Go to Charts page
+2. Pie chart shows monthly payroll split by department
+3. Bar chart shows total monthly expenses
+4. Add or delete an employee — charts update on next visit
+
+
+--- STRUCTURE (ROLES) ---
+
+1. Log in as admin → go to Structure
+2. Add a custom role (e.g. "Data Scientist")
+3. Restart the server — the role is still there
+4. When adding an employee, the new role appears in the dropdown
+
+
+================================================================================
+  PART 6 — SILVER FEATURES
+================================================================================
+
+--- PERMISSIONS ---
+
+1. Register an employee account (use /login → "Create an account")
+2. Log in as the employee
+3. Notice: Structure and Security links are NOT in the navbar
+4. The employee can view employees and payslips but cannot add/edit/delete
+
+To verify permissions programmatically:
+  After logging in, open browser DevTools → Application → Local Storage
+  → wageora_user → you will see:
+    "permissions": ["view_employees", "view_payslips", "view_statistics", "use_chat"]
+
+  An admin will have 8 permissions including "manage_employees", "view_logs", etc.
+
+
+--- REAL-TIME CHAT (requires two users simultaneously) ---
+
+Option A — Two browsers on the same machine:
+  1. Chrome: go to http://localhost:5173, log in as admin, go to Chat
+  2. Firefox (or Chrome Incognito): go to http://localhost:5173,
+     register and log in as a new employee account, go to Chat
+  3. Type a message in Chrome → it appears instantly in Firefox
+  4. Type a reply in Firefox → it appears instantly in Chrome
+
+Option B — Two devices (also demonstrates different-machine requirement):
+  1. Device 1: log in as admin, go to Chat
+  2. Device 2: access http://192.168.1.42:5173, log in as employee, go to Chat
+  3. Chat in real time between the two devices
+
+What to verify:
+  - The "● Connected" green indicator appears when WebSocket connects
+  - Messages appear instantly without page refresh
+  - Refreshing the page loads previous messages from the NoSQL database
+  - "X joined the chat" and "X left the chat" system messages appear
+
+
+================================================================================
+  PART 7 — GOLD FEATURES
+================================================================================
+
+--- ACTION LOGS ---
+
+1. Log in as admin
+2. Click "Security" in the navbar
+3. Click the "Action Logs" tab
+4. You will see every register, login, create/delete action logged with:
+   - Timestamp
+   - User name
+   - Group badge (ADMIN in purple, EMPLOYEE in blue)
+   - Action name (create_employee, login_failed, etc.)
+   - Action detail (JSON with extra context)
+
+
+--- SUSPICIOUS USER DETECTION ---
+
+Test brute-force detection (5 failed logins in 10 minutes):
+
+  Run this command 6 times in quick succession (or use a loop):
+
+    curl -X POST http://localhost:8000/api/auth/admin/login ^
+      -H "Content-Type: application/json" ^
+      -d "{\"email\":\"hacker@test.com\",\"password\":\"wrongpassword\"}"
+
+  PowerShell version:
+    1..6 | ForEach-Object {
+      Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/auth/admin/login `
+        -ContentType "application/json" `
+        -Body '{"email":"hacker@test.com","password":"wrongpassword"}'
+    }
+
+  After 5 failures, go to Security → Suspicious Users tab.
+  The email "hacker@test.com" appears as flagged with reason:
+  "Brute-force attempt: 5 failed logins in 10 min"
+
+Test mass deletion:
+  Delete 10 or more employees from the Employees page within 5 minutes.
+  (Add some with the faker generator first: click "Generate" on the
+  Employees page, then delete them quickly.)
+
+Dismiss a flag:
+  Click the "Dismiss" button on a suspicious user card.
+  The entry disappears from the list (marked inactive in the database).
+
+
+================================================================================
+  PART 8 — INSPECT THE DATABASE DIRECTLY
+================================================================================
+
+You can inspect the SQLite database file using the sqlite3 command-line tool
+or any SQLite browser (e.g. DB Browser for SQLite — free download).
+
+With sqlite3 CLI:
+
+    sqlite3 path\to\Wageora\Wageora\backend\wageora.db
+
+    -- List all tables
+    .tables
+
+    -- Show all employees with their role names (JOIN across normalized tables)
+    SELECT e.id, e.name, r.name as role, e.employment_type
+    FROM employees e
+    JOIN employee_roles r ON e.role_id = r.id;
+
+    -- Show user groups and their permissions
+    SELECT g.name as group_name, p.name as permission
+    FROM user_groups g
+    JOIN group_permissions gp ON g.id = gp.group_id
+    JOIN permissions p ON gp.permission_id = p.id
+    ORDER BY g.name;
+
+    -- Show recent action logs
+    SELECT user_name, group_name, action, timestamp
+    FROM action_logs
+    ORDER BY timestamp DESC
+    LIMIT 10;
+
+    -- Show suspicious users
+    SELECT user_name, reason, action_count, flagged_at
+    FROM suspicious_users
+    WHERE is_active = 1;
+
+    .quit
+
+The NoSQL chat database is stored in:
+    path\to\Wageora\Wageora\backend\chat_messages.json
+You can open this file in any text editor to see the chat documents.
+
+
+================================================================================
+  QUICK REFERENCE
+================================================================================
+
+  Backend server    :  py -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+  Frontend server   :  npm run dev
+  Run all tests     :  py -m pytest tests/ -v
+  Coverage report   :  py -m pytest tests/ --cov=. --cov-report=html
+  API documentation :  http://localhost:8000/docs
+  App (local)       :  http://localhost:5173
+  App (other device):  http://<your-ip>:5173
+  SQLite DB file    :  backend/wageora.db
+  NoSQL chat file   :  backend/chat_messages.json
+
+
+================================================================================
