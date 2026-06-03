@@ -9,9 +9,7 @@ from sqlalchemy.orm import Session
 from db_models import Payslip
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
 def _next_id(db: Session) -> str:
     max_id: Optional[str] = db.query(func.max(Payslip.id)).scalar()
@@ -35,9 +33,7 @@ def _enrich(p: Payslip) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
 # CRUD
-# ---------------------------------------------------------------------------
 
 def get_all_for_employee(db: Session, employee_id: str) -> List[dict]:
     rows = db.query(Payslip).filter(Payslip.employee_id == employee_id).all()

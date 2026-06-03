@@ -76,7 +76,7 @@ async def stop_faker() -> dict:
 
 @router.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket) -> None:
-    """WebSocket endpoint — clients connect here to receive live employee updates."""
+    """WebSocket endpoint - clients connect here to receive live employee updates."""
     await manager.connect(ws)
     try:
         while True:

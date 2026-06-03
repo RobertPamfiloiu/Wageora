@@ -133,7 +133,7 @@ export default function EmployeesPage() {
           }
         }
       } catch {
-        // Network error mid-scroll — stop trying to load more
+        // Network error mid-scroll - stop trying to load more
         if (!cancelled) setHasMore(false)
       } finally {
         if (!cancelled) setLoading(false)
@@ -228,7 +228,7 @@ export default function EmployeesPage() {
             onChange={e => setSearch(e.target.value)}
           />
           <div className="emp-toolbar-right">
-            {/* Silver: faker live-feed controls — admin only */}
+            {/* Silver: faker live-feed controls - admin only */}
             {isOnline && isAdmin && <FakerControls />}
             <button className="btn btn-accent" onClick={() => setAddOpen(true)}>+ Add Employee</button>
             <button className="btn btn-primary" onClick={() => navigate('/charts')}>View Charts</button>

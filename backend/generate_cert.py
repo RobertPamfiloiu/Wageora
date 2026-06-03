@@ -5,7 +5,7 @@ Usage:
     python generate_cert.py
 
 Outputs cert.pem and key.pem in the current directory.
-Browsers will show a security warning — click Advanced → Proceed to accept the
+Browsers will show a security warning - click Advanced -> Proceed to accept the
 self-signed certificate during the lab demo.
 """
 from __future__ import annotations

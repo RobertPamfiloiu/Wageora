@@ -31,7 +31,7 @@ function loadStored() {
     const parsed = JSON.parse(raw)
     // Support both old format {id,name,...} and new format {token, user}
     if (parsed && parsed.token) return { user: parsed.user, token: parsed.token }
-    // Legacy format — discard (user must log in again to get a JWT)
+    // Legacy format - discard (user must log in again to get a JWT)
     return { user: null, token: null }
   } catch { return { user: null, token: null } }
 }

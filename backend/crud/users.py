@@ -8,9 +8,7 @@ from sqlalchemy.orm import Session
 from db_models import GroupPermission, Permission, User, UserGroup
 from jwt_utils import hash_password, verify_password
 
-# ---------------------------------------------------------------------------
 # Seed data for groups & permissions
-# ---------------------------------------------------------------------------
 
 ADMIN_PERMISSIONS = [
     ("manage_employees",  "Create, edit and delete employees"),
@@ -61,9 +59,7 @@ def seed_groups_and_permissions(db: Session) -> None:
     db.commit()
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
 def _group_for_type(db: Session, account_type: str) -> UserGroup:
     group = db.query(UserGroup).filter(UserGroup.name == account_type).first()
@@ -83,9 +79,7 @@ def _public(user: User) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
 # CRUD
-# ---------------------------------------------------------------------------
 
 def register(db: Session, account_type: str, name: str, email: str, password: str) -> dict:
     group = _group_for_type(db, account_type)

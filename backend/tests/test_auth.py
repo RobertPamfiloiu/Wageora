@@ -42,9 +42,7 @@ def auth_client():
 ADMIN = {"name": "Alice Admin", "email": "alice@test.com", "password": "pass123"}
 EMP = {"name": "Bob Worker", "email": "bob@test.com", "password": "pass456"}
 
-# ---------------------------------------------------------------------------
 # Register
-# ---------------------------------------------------------------------------
 
 def test_admin_register_success(auth_client):
     r = auth_client.post("/api/auth/admin/register", json=ADMIN)
@@ -84,9 +82,7 @@ def test_admin_register_short_password(auth_client):
     assert auth_client.post("/api/auth/admin/register", json={**ADMIN, "password": "12"}).status_code == 422
 
 
-# ---------------------------------------------------------------------------
 # Login
-# ---------------------------------------------------------------------------
 
 def test_admin_login_success(auth_client):
     auth_client.post("/api/auth/admin/register", json=ADMIN)
@@ -159,9 +155,7 @@ def test_employee_credentials_rejected_for_admin_login(auth_client):
     assert auth_client.post("/api/auth/admin/login", json={"email": EMP["email"], "password": EMP["password"]}).status_code == 401
 
 
-# ---------------------------------------------------------------------------
 # Permissions
-# ---------------------------------------------------------------------------
 
 def test_admin_has_full_permissions(auth_client):
     body = auth_client.post("/api/auth/admin/register", json=ADMIN).json()
@@ -188,9 +182,7 @@ def test_login_returns_permissions(auth_client):
     assert len(body["user"]["permissions"]) > 0
 
 
-# ---------------------------------------------------------------------------
 # JWT token validation & protected routes
-# ---------------------------------------------------------------------------
 
 def test_protected_route_without_token_returns_401(auth_client):
     assert auth_client.get("/api/employees").status_code == 401
@@ -236,7 +228,7 @@ def test_password_is_hashed_not_stored_plain(auth_client):
     from database import get_db as real_get_db
     from db_models import User
     auth_client.post("/api/auth/admin/register", json=ADMIN)
-    # Override is active — grab DB from override
+    # Override is active - grab DB from override
     db = next(auth_client.app.dependency_overrides[real_get_db]())
     user = db.query(User).filter(User.email == ADMIN["email"]).first()
     assert user is not None

@@ -1,4 +1,4 @@
-// Auth-only validation — employee/pay-calc validation lives in the backend.
+// Auth-only validation - employee/pay-calc validation lives in the backend.
 
 export const validateLogin = ({ email, password }) => {
   const errors = {}

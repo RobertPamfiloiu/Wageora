@@ -106,7 +106,7 @@ export function EmployeeProvider({ children }) {
       const data = await res.json()
       setEmployees(data.items)
     } catch {
-      // Network is down — the cached state from localStorage remains in use
+      // Network is down - the cached state from localStorage remains in use
     }
   }, [])
 

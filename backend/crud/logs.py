@@ -75,7 +75,7 @@ def check_suspicious(
 ) -> None:
     now = datetime.utcnow()
 
-    # --- rapid calls check (any action) ---
+    # rapid calls check (any action)
     rapid_cutoff = now - timedelta(minutes=_RAPID_CALLS_WINDOW)
     rapid_count = (
         db.query(ActionLog)
@@ -89,7 +89,7 @@ def check_suspicious(
         )
         return
 
-    # --- delete-heavy check ---
+    # delete-heavy check
     if "delete" in action.lower():
         del_cutoff = now - timedelta(minutes=_DELETE_WINDOW)
         del_count = (
@@ -108,7 +108,7 @@ def check_suspicious(
             )
             return
 
-    # --- failed login check ---
+    # failed login check
     if "login_failed" in action.lower():
         login_cutoff = now - timedelta(minutes=_FAILED_LOGIN_WINDOW)
         fail_count = (

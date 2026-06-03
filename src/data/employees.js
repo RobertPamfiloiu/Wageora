@@ -1,4 +1,4 @@
-// UI constants — business logic (validation, pay calc, ID generation) lives in the backend.
+// UI constants - business logic (validation, pay calc, ID generation) lives in the backend.
 
 export const ROLES = [
   'HR Manager', 'Accountant', 'Cleaner', 'Cashier',
