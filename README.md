@@ -1,21 +1,25 @@
-# Wageora – Payroll Management App
+# Wageora - Payroll Management App
 
-A full-stack payroll management application. React + Vite frontend, FastAPI backend (in-memory storage).
+A full-stack payroll management application built with React + Vite and FastAPI.
+
+**Live:** https://wageora.onrender.com
 
 ## Tech Stack
 
 **Frontend**
 - React 18 + React Router v6
-- Recharts (donut + bar charts)
+- Recharts (pie + bar charts)
+- WebSockets (real-time employee feed)
 - Vitest + Testing Library (unit tests)
 - Playwright (E2E tests)
 
 **Backend**
 - FastAPI + Pydantic v2
-- In-memory storage (no database)
+- SQLAlchemy + SQLite
+- JWT authentication (python-jose + bcrypt)
+- Strawberry GraphQL (payslips)
+- WebSockets (chat + live faker feed)
 - pytest + httpx (unit tests)
-
----
 
 ## Quick Start
 
@@ -31,8 +35,8 @@ pip install -r requirements.txt
 
 # Start server
 uvicorn main:app --reload
-# → http://localhost:8000
-# → http://localhost:8000/docs  (Swagger UI)
+# -> http://localhost:8000
+# -> http://localhost:8000/docs  (Swagger UI)
 ```
 
 ### 2. Frontend
@@ -45,75 +49,88 @@ npm install
 
 # Start dev server
 npm run dev
-# → http://localhost:5173
+# -> http://localhost:5173
 ```
 
-The frontend proxies `/employees`, `/auth`, `/structure`, `/statistics`, and `/health` to `http://localhost:8000`.
-
----
+The frontend proxies all `/api/*` requests to `http://localhost:8000` in development.
 
 ## Project Structure
 
 ```
 Wageora/
 ├── backend/
-│   ├── main.py                  ← FastAPI app, CORS, router registration
-│   ├── store.py                 ← EmployeeStore (in-memory, seeded with 10 employees)
-│   ├── auth_store.py            ← AuthStore (separate admin + employee pools)
-│   ├── structure_store.py       ← StructureStore (custom roles list)
-│   ├── services.py              ← Pay calculation logic
+│   ├── main.py                  <- FastAPI app, CORS, JWT middleware, router registration
+│   ├── database.py              <- SQLAlchemy engine + session setup
+│   ├── db_models.py             <- ORM models (User, Employee, Payslip, etc.)
+│   ├── jwt_utils.py             <- JWT encode/decode, password hashing
+│   ├── graphql_schema.py        <- Strawberry GraphQL schema (payslips)
+│   ├── websocket_manager.py     <- WebSocket connection manager
+│   ├── seed.py                  <- Seed data (employees, roles)
+│   ├── services.py              <- Pay calculation logic
+│   ├── crud/
+│   │   ├── employees.py         <- Employee CRUD
+│   │   ├── users.py             <- User registration + login
+│   │   ├── payslips.py          <- Payslip CRUD
+│   │   ├── roles.py             <- Role management
+│   │   ├── logs.py              <- Action logging + suspicious activity detection
+│   │   └── chat.py              <- Chat message persistence
 │   ├── models/
-│   │   ├── employee.py          ← Pydantic models: Create, Update, Response, Paginated
-│   │   └── auth.py              ← UserCreate, UserResponse
+│   │   ├── employee.py          <- Pydantic models: Create, Update, Response
+│   │   ├── auth.py              <- UserCreate, UserResponse
+│   │   └── payslip.py           <- Payslip models
 │   ├── routers/
-│   │   ├── employees.py         ← CRUD + pagination + search
-│   │   ├── auth.py              ← /auth/admin/* and /auth/employee/*
-│   │   ├── structure.py         ← /structure/roles CRUD
-│   │   └── statistics.py        ← /statistics summary endpoint
+│   │   ├── auth.py              <- /api/auth/admin/* and /api/auth/employee/*
+│   │   ├── employees.py         <- CRUD + pagination + search
+│   │   ├── payslips.py          <- Payslip endpoints + GraphQL
+│   │   ├── structure.py         <- /api/structure/roles CRUD
+│   │   ├── statistics.py        <- /api/statistics summary
+│   │   ├── chat.py              <- WebSocket chat
+│   │   ├── faker_gen.py         <- Live employee generator (WebSocket)
+│   │   └── admin_logs.py        <- Action logs + suspicious user management
 │   ├── tests/
-│   │   ├── conftest.py          ← fixtures (seeded store, test client)
-│   │   ├── test_employees.py
 │   │   ├── test_auth.py
+│   │   ├── test_employees.py
+│   │   ├── test_payslips.py
 │   │   ├── test_structure.py
-│   │   └── test_statistics.py
+│   │   ├── test_statistics.py
+│   │   └── test_logs.py
 │   ├── pytest.ini
 │   └── requirements.txt
 │
 ├── src/
+│   ├── main.jsx                 <- Entry point, global fetch override for production
+│   ├── App.jsx                  <- Routes
 │   ├── context/
-│   │   ├── AuthContext.jsx      ← auth state, login/register calls
-│   │   ├── EmployeeContext.jsx  ← employee state, fetch-based CRUD
-│   │   └── AppContext.jsx       ← combines auth + employee contexts
+│   │   ├── AuthContext.jsx      <- Auth state, login/register/logout
+│   │   ├── EmployeeContext.jsx  <- Employee state, CRUD, offline queue, WebSocket
+│   │   └── AppContext.jsx       <- Combines contexts
 │   ├── components/
 │   │   ├── Navbar.jsx
-│   │   ├── EmployeeModal.jsx    ← add/edit employee modal
-│   │   ├── DetailModal.jsx      ← pay slip popup
-│   │   └── ProtectedRoute.jsx  ← guards routes by auth + account type
+│   │   ├── EmployeeModal.jsx    <- Add/edit employee modal
+│   │   ├── DetailModal.jsx      <- Employee detail popup
+│   │   └── ProtectedRoute.jsx  <- Route guards by auth + account type
 │   ├── pages/
 │   │   ├── LandingPage.jsx
-│   │   ├── LoginPage.jsx        ← employee login
-│   │   ├── SignUpPage.jsx       ← employee registration
+│   │   ├── LoginPage.jsx        <- Employee login
+│   │   ├── SignUpPage.jsx       <- Employee registration
 │   │   ├── AdminLoginPage.jsx
 │   │   ├── AdminSignupPage.jsx
-│   │   ├── EmployeesPage.jsx    ← paginated table + CRUD
-│   │   ├── EmployeeDetail.jsx   ← individual employee view
-│   │   ├── ChartsPage.jsx       ← donut + bar charts
-│   │   └── StructurePage.jsx    ← admin role management
-│   ├── utils/
-│   │   ├── validation.js        ← login/signup form validation
-│   │   └── cookies.js           ← activity tracking
-│   └── tests/
-│       ├── pages.test.jsx
-│       ├── appContext.test.jsx
-│       ├── components.test.jsx
-│       └── validation.test.js
+│   │   ├── EmployeesPage.jsx    <- Infinite scroll table + CRUD
+│   │   ├── EmployeeDetail.jsx   <- Individual employee view
+│   │   ├── ChartsPage.jsx       <- Pie + bar charts + live edit table
+│   │   ├── PayslipsPage.jsx     <- Payslip management (GraphQL)
+│   │   ├── ChatPage.jsx         <- Real-time WebSocket chat
+│   │   ├── StructurePage.jsx    <- Role management
+│   │   └── AdminLogsPage.jsx    <- Action logs + suspicious activity
+│   └── utils/
+│       ├── api.js               <- authHeaders(), apiFetch()
+│       ├── validation.js        <- Login/signup form validation
+│       └── cookies.js           <- Activity tracking
 │
 ├── e2e/
-│   └── wageora.spec.js          ← Playwright E2E scenarios
+│   └── wageora.spec.js          <- Playwright E2E scenarios
 └── vite.config.js
 ```
-
----
 
 ## Testing
 
@@ -129,10 +146,8 @@ py -m pytest
 py -m pytest --no-cov
 
 # Run a specific file
-py -m pytest tests/test_employees.py
+py -m pytest tests/test_auth.py
 ```
-
-Coverage report prints to terminal after each run.
 
 ### Frontend (Vitest)
 
@@ -162,13 +177,27 @@ npm run test:e2e
 npm run test:e2e:ui
 ```
 
----
-
 ## Accounts
 
-Admin and employee accounts are independent pools — the same email address can hold both an admin account and an employee account.
+Admin and employee accounts are independent pools - the same email can hold both an admin and an employee account.
 
-- **Admin** – full access: employee CRUD, charts, role management via Structure page
-- **Employee** – limited access (login/dashboard only)
+- **Admin** - full access: employee CRUD, charts, payslips, role management, chat, security logs
+- **Employee** - restricted access: view employees, view own payslips, charts, chat
 
-The backend is in-memory only. All data resets when the backend server restarts.
+On first startup the backend seeds the database with sample employees and roles.
+
+## Environment Variables
+
+| Variable | Where | Description |
+|---|---|---|
+| `JWT_SECRET` | Backend | Secret key for signing JWT tokens. Set a strong random value in production. |
+| `VITE_BACKEND_URL` | Frontend (build time) | Backend base URL. Required when frontend and backend are on different domains. |
+
+## Deployment
+
+The app is deployed on Render as two separate services:
+
+- **Backend** - Web Service (Python), root directory: `backend`, start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Frontend** - Static Site, build command: `npm install && npm run build`, publish directory: `dist`
+
+The static site requires a Redirect/Rewrite rule (`/*` -> `/index.html`, Rewrite) for React Router to work correctly on page refresh.
