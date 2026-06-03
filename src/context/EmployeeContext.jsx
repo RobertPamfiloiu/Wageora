@@ -128,9 +128,11 @@ export function EmployeeProvider({ children }) {
   useEffect(() => {
     let ws
     const connect = () => {
-      // Use the Vite proxy (/ws → ws://localhost:8000/ws)
-      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      ws = new WebSocket(`${proto}//${window.location.host}/api/ws`)
+      const backendUrl = import.meta.env.VITE_BACKEND_URL
+      const wsBase = backendUrl
+        ? backendUrl.replace(/^http/, 'ws')
+        : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
+      ws = new WebSocket(`${wsBase}/api/ws`)
       wsRef.current = ws
 
       ws.onmessage = (e) => {
