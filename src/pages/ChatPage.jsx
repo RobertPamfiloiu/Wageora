@@ -3,7 +3,11 @@ import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import './ChatPage.css'
 
-const WS_BASE = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+const WS_BASE = (() => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL
+  if (backendUrl) return backendUrl.replace(/^http/, 'ws')
+  return `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+})()
 
 export default function ChatPage() {
   const { user } = useAuth()
